@@ -4,11 +4,13 @@ set -eo pipefail
 : "${ASDF_INSTALL_VERSION:?"Missing ASDF_INSTALL_VERSION"}"
 : "${ASDF_INSTALL_PATH:?"Missing ASDF_INSTALL_PATH"}"
 
+echo "ASDF_INSTALL_VERSION: $ASDF_INSTALL_VERSION"
+echo "ASDF_INSTALL_PATH: $ASDF_INSTALL_PATH"
+
 install_tool() {
   local version=$1
   local install_path=$2
   local bin_install_path="${install_path}/bin"
-  local binary_name="database-tools"
   local platform=""
   local arch=""
   local tempdir=""
@@ -26,16 +28,12 @@ install_tool() {
   tempfile="${tempdir}/${version}.tar.gz"
   download_url="https://github.com/egose/database-tools/releases/download/${filename}"
 
-  echo "download_url $download_url"
-  echo "ASDF_INSTALL_PATH $ASDF_INSTALL_PATH"
-
+  echo "download_url: $download_url"
   curl -L "${download_url}" -o "${tempfile}"
-  tar zxf "${tempfile}" -C "$install_path" --strip-components=1 || exit 1
 
   echo "Creating bin install directory"
   mkdir -p "$bin_install_path"
-  cp "${install_path}/${binary_name}" "${bin_install_path}/${binary_name}"
-  chmod +x "${bin_install_path}/${binary_name}"
+  tar zxf "${tempfile}" -C "$bin_install_path" || exit 1
 
   rm -rf "${tempdir}"
 }
