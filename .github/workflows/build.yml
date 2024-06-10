@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  pull_request:
+    paths-ignore:
+    - '**.md'
+  push:
+    paths-ignore:
+    - '**.md'
+
+jobs:
+  plugin-test:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: hmarr/debug-action@f7318c783045ac39ed9bb497e22ce835fdafbfe6
+    - uses: actions/checkout@b80ff79f1755d06ba70441c368a6fe801f5f3a62
+
+    - name: Install asdf
+      uses: asdf-vm/actions/setup@6278efebb38ae025cc91dd008910f549e775a8c8
+
+    - name: Move database-tools plugin to asdf plugins dir
+      run: |
+        mkdir -p ${ASDF_DIR}/plugins
+        cp -r . ${ASDF_DIR}/plugins/database-tools
+
+    - name: Run database-tools plugin tests
+      run: |
+        echo "Trying to list all versions of database-tools"
+        asdf list all database-tools
+        echo "Trying to install database-tools 0.8.1"
+        asdf install database-tools 0.8.1
+        asdf list database-tools | grep 0.8.1
+
+    - uses: asdf-vm/actions/plugin-test@6278efebb38ae025cc91dd008910f549e775a8c8
+      with:
+        command: database-tools --version

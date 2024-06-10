@@ -1,0 +1,29 @@
+name: Check code/commit conventions
+
+on: push
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: hmarr/debug-action@f7318c783045ac39ed9bb497e22ce835fdafbfe6
+    - uses: actions/checkout@b80ff79f1755d06ba70441c368a6fe801f5f3a62
+
+    - name: Install asdf tools
+      uses: egose/actions/asdf-tools@6be83b27672d3e09a451e7aeb195781604a124da
+
+    - name: Install python tools
+      run: |
+        pip install -r requirements.txt
+        asdf reshim
+
+    - name: Rerun Pre-Commit Hooks on CI
+      run: pre-commit run --color=always --show-diff-on-failure --all-files
+
+  commitlint:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@b80ff79f1755d06ba70441c368a6fe801f5f3a62
+      with:
+        fetch-depth: 0
+    - uses: wagoid/commitlint-github-action@7f0a61df502599e1f1f50880aaa7ec1e2c0592f2
