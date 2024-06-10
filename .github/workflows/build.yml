@@ -33,4 +33,4 @@ jobs:
 
     - uses: asdf-vm/actions/plugin-test@6278efebb38ae025cc91dd008910f549e775a8c8
       with:
-        command: database-tools --version
+        command: mongo-archive --help
