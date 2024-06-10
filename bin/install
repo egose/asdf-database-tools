@@ -23,7 +23,7 @@ install_tool() {
   [ "linux" = "${platform}" ] && tempdir=$(mktemp -d asdf-database-tools.XXXX) || tempdir=$(mktemp -dt asdf-database-tools.XXXX)
 
   filename="v${version}/dist.tar.gz"
-  tempfile="${tempdir}/${filename}"
+  tempfile="${tempdir}/${version}.tar.gz"
   download_url="https://github.com/egose/database-tools/releases/download/${filename}"
 
   echo "download_url $download_url"
