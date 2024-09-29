@@ -7,6 +7,9 @@ set -eo pipefail
 echo "ASDF_INSTALL_VERSION: $ASDF_INSTALL_VERSION"
 echo "ASDF_INSTALL_PATH: $ASDF_INSTALL_PATH"
 
+github_coordinates="egose/database-tools"
+base_download_url="https://github.com/${github_coordinates}/releases/download"
+
 install_tool() {
   local version=$1
   local install_path=$2
@@ -18,15 +21,22 @@ install_tool() {
   local filename=""
   local download_url=""
 
-  [ "Linux" = "$(uname)" ] && platform="linux" || platform="osx"
-  [ "x86_64" = "$(uname -m)" ] && arch="x86_64" || arch="i686"
+  platform=$(uname | tr '[:upper:]' '[:lower:]')
+  arch=$(uname -m | tr '[:upper:]' '[:lower:]')
+
+  # x86_64 and amd64 refer to the same architecture.
+  # x86_64: This is the 64-bit extension of the x86 instruction set, first introduced by AMD. It's the technical name often used in Linux distributions.
+  # amd64: This name originates from AMD when they developed the 64-bit extension for the x86 architecture, and it's often used in contexts like Debian package names and Windows installers.
+  [ "$arch" = "x86_64" ] && arch="amd64"
+
   echo "platform: $platform, arch: $arch"
 
   [ "linux" = "${platform}" ] && tempdir=$(mktemp -d asdf-database-tools.XXXX) || tempdir=$(mktemp -dt asdf-database-tools.XXXX)
 
-  filename="v${version}/dist.tar.gz"
-  tempfile="${tempdir}/${version}.tar.gz"
-  download_url="https://github.com/egose/database-tools/releases/download/${filename}"
+  filename="${platform}-${arch}.tar.gz"
+  download_path="v${version}/${filename}"
+  tempfile="${tempdir}/${download_path}"
+  download_url="${base_download_url}/${download_path}"
 
   echo "download_url: $download_url"
   curl -L "${download_url}" -o "${tempfile}"
