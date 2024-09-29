@@ -1,4 +1,4 @@
-name: Build
+name: Test
 
 on:
   pull_request:
@@ -27,9 +27,9 @@ jobs:
       run: |
         echo "Trying to list all versions of database-tools"
         asdf list all database-tools
-        echo "Trying to install database-tools 0.8.1"
-        asdf install database-tools 0.8.1
-        asdf list database-tools | grep 0.8.1
+        echo "Trying to install database-tools 0.8.2"
+        asdf install database-tools 0.8.2
+        asdf list database-tools | grep 0.8.2
 
     - uses: asdf-vm/actions/plugin-test@6278efebb38ae025cc91dd008910f549e775a8c8
       with:
