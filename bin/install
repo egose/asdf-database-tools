@@ -35,10 +35,10 @@ install_tool() {
 
   filename="${platform}-${arch}.tar.gz"
   download_path="v${version}/${filename}"
-  tempfile="${tempdir}/${download_path}"
+  tempfile="${tempdir}/${filename}"
   download_url="${base_download_url}/${download_path}"
 
-  echo "download_url: $download_url"
+  echo "Download URL: $download_url"
   curl -L "${download_url}" -o "${tempfile}"
 
   echo "Creating bin install directory"
