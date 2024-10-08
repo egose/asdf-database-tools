@@ -7,9 +7,9 @@
 ### Plugin
 
 ```sh
-asdf plugin add database-tools
+asdf plugin add mongodb-database-tools
 # or
-asdf plugin add database-tools https://github.com/egose/asdf-database-tools.git
+asdf plugin add mongodb-database-tools https://github.com/egose/asdf-database-tools.git
 ```
 
 ### database-tools
