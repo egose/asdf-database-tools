@@ -7,19 +7,19 @@ set -eo pipefail
 echo "ASDF_INSTALL_VERSION: $ASDF_INSTALL_VERSION"
 echo "ASDF_INSTALL_PATH: $ASDF_INSTALL_PATH"
 
-github_coordinates="egose/database-tools"
+tool_name="database-tools"
+github_coordinates="egose/${tool_name}"
 base_download_url="https://github.com/${github_coordinates}/releases/download"
 
 install_tool() {
   local version=$1
   local install_path=$2
   local bin_install_path="${install_path}/bin"
-  local platform=""
-  local arch=""
-  local tempdir=""
-  local tempfile=""
-  local filename=""
-  local download_url=""
+  local platform
+  local arch
+  local tempdir
+  local tempfile
+  local download_url
 
   platform=$(uname | tr '[:upper:]' '[:lower:]')
   arch=$(uname -m | tr '[:upper:]' '[:lower:]')
@@ -29,23 +29,41 @@ install_tool() {
   # amd64: This name originates from AMD when they developed the 64-bit extension for the x86 architecture, and it's often used in contexts like Debian package names and Windows installers.
   [ "$arch" = "x86_64" ] && arch="amd64"
 
-  echo "platform: $platform, arch: $arch"
+  echo "Platform: $platform, Architecture: $arch"
 
-  [ "linux" = "${platform}" ] && tempdir=$(mktemp -d asdf-database-tools.XXXX) || tempdir=$(mktemp -dt asdf-database-tools.XXXX)
+  tempdir=$(mktemp -d "asdf-${tool_name}.XXXX")
 
-  filename="${platform}-${arch}.tar.gz"
-  download_path="v${version}/${filename}"
-  tempfile="${tempdir}/${filename}"
-  download_url="${base_download_url}/${download_path}"
+  local shortname="${platform}-${arch}.tar.gz"
+  local filenames=("${shortname}" "${tool_name}-${shortname}")
 
-  echo "Download URL: $download_url"
-  curl -L "${download_url}" -o "${tempfile}"
+  # Attempt to download each file
+  for filename in "${filenames[@]}"; do
+    download_path="v${version}/${filename}"
+    tempfile="${tempdir}/${filename}"
+    download_url="${base_download_url}/${download_path}"
 
-  echo "Creating bin install directory"
-  mkdir -p "$bin_install_path"
-  tar zxf "${tempfile}" -C "$bin_install_path" || exit 1
+    echo "Attempting to download: $download_url"
 
+    # Download the file; ignore errors and continue to the next filename if it fails
+    if curl -L --fail "${download_url}" -o "${tempfile}"; then
+      echo "Download successful: $download_url"
+      echo "Creating bin install directory"
+      mkdir -p "$bin_install_path"
+      tar zxf "${tempfile}" -C "$bin_install_path" || {
+        echo "Extraction failed."
+        exit 1
+      }
+
+      rm -rf "${tempdir}"
+      return 0 # Exit the function right away if the installation succeeds.
+    else
+      echo "Download failed for: $download_url. Trying next filename..."
+    fi
+  done
+
+  echo "All download attempts failed."
   rm -rf "${tempdir}"
+  exit 1
 }
 
 install_tool "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
