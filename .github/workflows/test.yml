@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: hmarr/debug-action@f7318c783045ac39ed9bb497e22ce835fdafbfe6
-    - uses: actions/checkout@b80ff79f1755d06ba70441c368a6fe801f5f3a62
+    - uses: actions/checkout@3b9b8c884f6b4bb4d5be2779c26374abadae0871
 
     - name: Install asdf
       uses: asdf-vm/actions/setup@6278efebb38ae025cc91dd008910f549e775a8c8
