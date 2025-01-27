@@ -16,7 +16,7 @@ jobs:
     - uses: actions/checkout@cbb722410c2e876e24abbe8de2cc27693e501dcb
 
     - name: Install asdf
-      uses: asdf-vm/actions/setup@6278efebb38ae025cc91dd008910f549e775a8c8
+      uses: asdf-vm/actions/setup@1bf052e01b498bba4f98e1bbb5c609bc212cf463
 
     - name: Move database-tools plugin to asdf plugins dir
       run: |
@@ -31,6 +31,6 @@ jobs:
         asdf install database-tools 0.8.2
         asdf list database-tools | grep 0.8.2
 
-    - uses: asdf-vm/actions/plugin-test@6278efebb38ae025cc91dd008910f549e775a8c8
+    - uses: asdf-vm/actions/plugin-test@1bf052e01b498bba4f98e1bbb5c609bc212cf463
       with:
         command: mongo-archive --help
