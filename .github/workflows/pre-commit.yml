@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@c2d88d3ecc89a9ef08eebf45d9637801dcee7eb5
 
     - name: Install asdf tools
-      uses: egose/actions/asdf-tools@efab35116a4e24f81385dc9a7a711d358c87bca7
+      uses: egose/actions/asdf-tools@2d58a4812db6cab0a183efacffaadb25230a738f
 
     - name: Install python tools
       run: |
