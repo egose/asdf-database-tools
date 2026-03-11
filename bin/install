@@ -1,77 +1,32 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-: "${ASDF_INSTALL_VERSION:?"Missing ASDF_INSTALL_VERSION"}"
-: "${ASDF_INSTALL_PATH:?"Missing ASDF_INSTALL_PATH"}"
-
-echo "ASDF_INSTALL_VERSION: $ASDF_INSTALL_VERSION"
-echo "ASDF_INSTALL_PATH: $ASDF_INSTALL_PATH"
-
 tool_name="database-tools"
-github_coordinates="egose/${tool_name}"
-base_download_url="https://github.com/${github_coordinates}/releases/download"
+install_type="$ASDF_INSTALL_TYPE"
+version="$ASDF_INSTALL_VERSION"
+install_path="$ASDF_INSTALL_PATH"
+download_path="$ASDF_DOWNLOAD_PATH"
 
-# Global tempdir and trap
-tempdir=$(mktemp -d -t "asdf-${tool_name}.XXXX")
-trap 'rm -rf "$tempdir"' EXIT
+if [ "$install_type" != "version" ]; then
+  echo "asdf-$tool_name supports data-type 'version' only (got: $install_type)"
+  exit 1
+fi
 
-install_tool() {
-  local version=$1
-  local install_path=$2
-  local bin_install_path="${install_path}/bin"
-  local platform
-  local arch
-  # REMOVED: local tempdir <--- This was the cause of the Permission Denied error
+(
+  mkdir -p "$install_path/bin"
 
-  platform=$(uname | tr '[:upper:]' '[:lower:]')
-  arch=$(uname -m | tr '[:upper:]' '[:lower:]')
+  # Navigate to download folder to find the tarball
+  cd "$download_path"
 
-  # Architecture Normalization:
-  # x86_64 and amd64 refer to the same architecture.
-  # - x86_64: This is the 64-bit extension of the x86 instruction set, first introduced by AMD.
-  #   It's the technical name often used in Linux distributions.
-  # - amd64: This name originates from AMD when they developed the 64-bit extension for
-  #   the x86 architecture, and it's often used in contexts like Debian package names and Windows installers.
-  case "$arch" in
-  x86_64 | amd64 | x64)
-    arch="amd64"
-    ;;
-  aarch64 | arm64)
-    arch="arm64"
-    ;;
-  *)
-    echo "Unsupported architecture: $arch"
-    exit 1
-    ;;
-  esac
+  # Find the downloaded tar.gz and extract it into the install path's bin
+  echo "Installing $tool_name v$version..."
+  find . -name "*.tar.gz" -maxdepth 1 -exec tar -zxf {} -C "$install_path/bin" \;
 
-  echo "Platform: $platform, Architecture: $arch"
+  # Ensure the extracted binaries are executable
+  chmod +x "$install_path/bin"/* 2>/dev/null || true
 
-  local shortname="${platform}-${arch}.tar.gz"
-  local filenames=("${shortname}" "${tool_name}-${shortname}")
-
-  for filename in "${filenames[@]}"; do
-    local download_url="${base_download_url}/v${version}/${filename}"
-    local tempfile="${tempdir}/${filename}"
-
-    echo "Attempting to download: $download_url"
-
-    if curl -L --fail --connect-timeout 10 --retry 3 "${download_url}" -o "${tempfile}"; then
-      echo "Download successful. Installing to $bin_install_path"
-      mkdir -p "$bin_install_path"
-
-      tar -zxf "${tempfile}" -C "$bin_install_path"
-      chmod +x "$bin_install_path"/* 2>/dev/null || true
-
-      echo "Installation complete."
-      return 0
-    else
-      echo "Download failed for: $filename. Trying next variant..."
-    fi
-  done
-
-  echo "Error: All download attempts failed for $tool_name v$version."
+  echo "$tool_name v$version installation was successful!"
+) || {
+  echo "Error: Installation failed."
   exit 1
 }
-
-install_tool "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"

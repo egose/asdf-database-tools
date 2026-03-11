@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+tool_name="database-tools"
+github_coordinates="egose/${tool_name}"
+base_download_url="https://github.com/${github_coordinates}/releases/download"
+
+# asdf sets these variables
+version="$ASDF_INSTALL_VERSION"
+download_path="$ASDF_DOWNLOAD_PATH"
+
+platform=$(uname | tr '[:upper:]' '[:lower:]')
+arch=$(uname -m | tr '[:upper:]' '[:lower:]')
+
+# Architecture Normalization
+# x86_64 and amd64 refer to the same architecture.
+# - x86_64: Technical name often used in Linux distributions.
+# - amd64: Originated from AMD, used in Debian and Windows installers.
+case "$arch" in
+x86_64 | amd64 | x64) arch="amd64" ;;
+aarch64 | arm64) arch="arm64" ;;
+*)
+  echo "Unsupported architecture: $arch"
+  exit 1
+  ;;
+esac
+
+shortname="${platform}-${arch}.tar.gz"
+filenames=("${shortname}" "${tool_name}-${shortname}")
+
+mkdir -p "$download_path"
+
+for filename in "${filenames[@]}"; do
+  download_url="${base_download_url}/v${version}/${filename}"
+  outfile="${download_path}/${filename}"
+
+  echo "Attempting to download: $download_url"
+
+  if curl -L --fail --connect-timeout 10 --retry 3 "${download_url}" -o "${outfile}"; then
+    echo "Download successful."
+    exit 0
+  fi
+done
+
+echo "Error: All download attempts failed for $tool_name v$version."
+exit 1
