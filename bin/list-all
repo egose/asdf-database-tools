@@ -1,27 +1,42 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-github_coordinates="egose/database-tools"
-releases_path="https://api.github.com/repos/${github_coordinates}/releases"
+github_coordinates="egose/asdf-database-tools"
+releases_url="https://api.github.com/repos/${github_coordinates}/releases"
 
-cmd="curl -s"
+# Use an array for headers to handle spaces/quotes safely
+curl_opts=("-s")
 if [ -n "$GITHUB_API_TOKEN" ]; then
-  cmd="$cmd -H 'Authorization: token $GITHUB_API_TOKEN'"
+  curl_opts+=("-H" "Authorization: token $GITHUB_API_TOKEN")
 fi
-cmd="$cmd $releases_path"
 
 sort_versions() {
   sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
     LC_ALL=C sort -V | cut -d ' ' -f 2
 }
 
-versions=$(
-  eval "$cmd" |
-    tee |
-    grep -o '"tag_name": *"[^"]*"' |
-    sed -E 's/"tag_name": *"v?([^"]*)"/\1/' |
-    sort_versions |
-    xargs
-)
+all_tags=""
+
+# Loop through pages 1 to 5 (500 items total)
+for page in {1..5}; do
+  # Construct the full URL with page params
+  current_url="${releases_url}?per_page=100&page=${page}"
+
+  # Execute curl using the array of options
+  response=$(curl "${curl_opts[@]}" "$current_url")
+
+  # Extract tag names
+  tags=$(echo "$response" | grep -o '"tag_name": *"[^"]*"' | sed -E 's/"tag_name": *"v?([^"]*)"/\1/' || true)
+
+  # If the response is empty or just "[]", break
+  if [ -z "$tags" ] || [ "$response" == "[]" ]; then
+    break
+  fi
+
+  all_tags="${all_tags}${tags}"$'\n'
+done
+
+# Clean up empty lines and sort
+versions=$(echo "$all_tags" | sed '/^$/d' | sort_versions | xargs)
 
 echo "$versions"
