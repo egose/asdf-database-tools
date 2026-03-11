@@ -11,7 +11,7 @@ tool_name="database-tools"
 github_coordinates="egose/${tool_name}"
 base_download_url="https://github.com/${github_coordinates}/releases/download"
 
-tempdir=$(mktemp -d -t "asdf-${tool_name}.XXXX")
+tempdir=$(mktemp -d "asdf-${tool_name}.XXXX")
 trap 'rm -rf "$tempdir"' EXIT
 
 install_tool() {
