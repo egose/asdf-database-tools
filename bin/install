@@ -11,7 +11,8 @@ tool_name="database-tools"
 github_coordinates="egose/${tool_name}"
 base_download_url="https://github.com/${github_coordinates}/releases/download"
 
-tempdir=$(mktemp -d "asdf-${tool_name}.XXXX")
+# Global tempdir and trap
+tempdir=$(mktemp -d -t "asdf-${tool_name}.XXXX")
 trap 'rm -rf "$tempdir"' EXIT
 
 install_tool() {
@@ -20,7 +21,7 @@ install_tool() {
   local bin_install_path="${install_path}/bin"
   local platform
   local arch
-  local tempdir
+  # REMOVED: local tempdir <--- This was the cause of the Permission Denied error
 
   platform=$(uname | tr '[:upper:]' '[:lower:]')
   arch=$(uname -m | tr '[:upper:]' '[:lower:]')
@@ -49,19 +50,18 @@ install_tool() {
   local shortname="${platform}-${arch}.tar.gz"
   local filenames=("${shortname}" "${tool_name}-${shortname}")
 
-  # Attempt to download each potential filename
   for filename in "${filenames[@]}"; do
     local download_url="${base_download_url}/v${version}/${filename}"
     local tempfile="${tempdir}/${filename}"
 
     echo "Attempting to download: $download_url"
 
-    # Download with a timeout and retry for reliability
     if curl -L --fail --connect-timeout 10 --retry 3 "${download_url}" -o "${tempfile}"; then
       echo "Download successful. Installing to $bin_install_path"
       mkdir -p "$bin_install_path"
 
       tar -zxf "${tempfile}" -C "$bin_install_path"
+      chmod +x "$bin_install_path"/* 2>/dev/null || true
 
       echo "Installation complete."
       return 0
