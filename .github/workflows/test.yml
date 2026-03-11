@@ -15,8 +15,8 @@ jobs:
     - uses: hmarr/debug-action@f7318c783045ac39ed9bb497e22ce835fdafbfe6
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
-    - name: Install asdf
-      uses: asdf-vm/actions/setup@1bf052e01b498bba4f98e1bbb5c609bc212cf463
+    - name: Install asdf tools
+      uses: egose/actions/asdf-tools@311fba04b7412f06d1cc7d77a5126a11e7c609e7
 
     - name: Move database-tools plugin to asdf plugins dir
       run: |
@@ -27,10 +27,10 @@ jobs:
       run: |
         echo "Trying to list all versions of database-tools"
         asdf list all database-tools
-        echo "Trying to install database-tools 0.8.2"
-        asdf install database-tools 0.8.2
-        asdf list database-tools | grep 0.8.2
+        echo "Trying to install database-tools 0.12.3"
+        asdf install database-tools 0.12.3
+        asdf list database-tools | grep 0.12.3
 
-    - uses: asdf-vm/actions/plugin-test@1bf052e01b498bba4f98e1bbb5c609bc212cf463
+    - uses: asdf-vm/actions/plugin-test@v4.0.1
       with:
-        command: mongo-archive --help
+        command: mongo-archive --version
