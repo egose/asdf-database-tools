@@ -1,4 +1,4 @@
 python 3.14.3
 shellcheck 0.11.0
 shfmt 3.13.0
-mongodb-database-tools 0.12.3
+mongodb-database-tools 0.12.1

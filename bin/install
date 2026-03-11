@@ -11,6 +11,9 @@ tool_name="database-tools"
 github_coordinates="egose/${tool_name}"
 base_download_url="https://github.com/${github_coordinates}/releases/download"
 
+tempdir=$(mktemp -d -t "asdf-${tool_name}.XXXX")
+trap 'rm -rf "$tempdir"' EXIT
+
 install_tool() {
   local version=$1
   local install_path=$2
@@ -42,10 +45,6 @@ install_tool() {
   esac
 
   echo "Platform: $platform, Architecture: $arch"
-
-  # Use a trap to ensure cleanup of the temp directory even on failure
-  tempdir=$(mktemp -d "asdf-${tool_name}.XXXX")
-  trap 'rm -rf "$tempdir"' EXIT
 
   local shortname="${platform}-${arch}.tar.gz"
   local filenames=("${shortname}" "${tool_name}-${shortname}")
