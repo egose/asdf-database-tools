@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: hmarr/debug-action@f7318c783045ac39ed9bb497e22ce835fdafbfe6
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+    - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
     - name: Install asdf tools
       uses: egose/actions/asdf-tools@311fba04b7412f06d1cc7d77a5126a11e7c609e7
@@ -23,7 +23,7 @@ jobs:
   commitlint:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+    - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
       with:
         fetch-depth: 0
     - uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed
